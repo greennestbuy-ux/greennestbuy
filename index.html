@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GreenNestBuy.in | Smart Home Appliances</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #2e7d32;
+    --green-light: #43a047;
+    --green-pale: #e8f5e9;
+    --terra: #bf5a2f;
+    --terra-light: #e8793a;
+    --cream: #faf8f4;
+    --dark: #1a1a1a;
+    --mid: #555;
+    --light: #888;
+    --border: #e5e0d8;
+    --white: #ffffff;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-hover: 0 8px 32px rgba(0,0,0,0.14);
+    --radius: 12px;
+    --wa: #25d366;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--green);
+    letter-spacing: -0.5px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .logo span { color: var(--terra); }
+  .logo-leaf { font-size: 20px; }
+
+  .header-right { display: flex; align-items: center; gap: 16px; }
+
+  .cart-btn {
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.2s;
+    position: relative;
+  }
+  .cart-btn:hover { background: var(--green-light); }
+  .cart-count {
+    background: var(--terra);
+    color: white;
+    border-radius: 50%;
+    width: 20px; height: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── HERO STRIP ── */
+  .hero {
+    background: linear-gradient(135deg, var(--green) 0%, #1b5e20 100%);
+    color: white;
+    padding: 36px 24px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 5vw, 44px);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .hero h1 em { color: #a5d6a7; font-style: italic; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 500px; margin: 0 auto 20px; }
+  .hero-badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 50px;
+    padding: 6px 16px;
+    font-size: 13px;
+    color: white;
+  }
+
+  /* ── REFURBISHED SECTION ── */
+  .refurb-section {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+    overflow: hidden;
+  }
+  .refurb-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: 0.3px;
+  }
+  .refurb-toggle:hover { background: var(--green-pale); }
+  .refurb-toggle .arrow { transition: transform 0.3s; font-size: 12px; }
+  .refurb-toggle.open .arrow { transform: rotate(180deg); }
+  .refurb-body {
+    display: none;
+    padding: 0 24px 20px;
+    background: var(--green-pale);
+  }
+  .refurb-body.open { display: block; }
+  .refurb-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    padding-top: 16px;
+  }
+  .refurb-card {
+    background: white;
+    border-radius: 10px;
+    padding: 14px;
+    border-left: 4px solid var(--green);
+  }
+  .refurb-card h4 { font-size: 13px; font-weight: 600; color: var(--green); margin-bottom: 4px; }
+  .refurb-card p { font-size: 12px; color: var(--mid); line-height: 1.5; }
+  .refurb-intro { font-size: 13px; color: var(--mid); padding-top: 12px; line-height: 1.6; }
+
+  /* ── FILTERS ── */
+  .filters-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+    position: sticky; top: 64px; z-index: 90;
+  }
+  .filter-label { font-size: 12px; font-weight: 600; color: var(--light); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+  .filter-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .filter-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+  .filter-chip {
+    border: 1.5px solid var(--border);
+    background: white;
+    color: var(--mid);
+    padding: 5px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .filter-chip:hover { border-color: var(--green); color: var(--green); }
+  .filter-chip.active { background: var(--green); color: white; border-color: var(--green); }
+  .filter-chip.grade-new.active { background: #1565c0; border-color: #1565c0; }
+  .filter-chip.grade-a.active { background: #2e7d32; border-color: #2e7d32; }
+  .filter-chip.grade-b.active { background: #e65100; border-color: #e65100; }
+  .filter-chip.grade-c.active { background: #6a1b9a; border-color: #6a1b9a; }
+
+  .results-count { margin-left: auto; font-size: 13px; color: var(--light); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--light);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 18px; color: var(--mid); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── PRODUCT GRID ── */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 20px;
+    padding: 24px;
+  }
+
+  /* ── PRODUCT CARD ── */
+  .product-card {
+    background: white;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.25s, transform 0.25s;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    border: 1px solid var(--border);
+    animation: fadeUp 0.4s ease both;
+  }
+  .product-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-3px);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-image-wrap {
+    width: 100%;
+    height: 190px;
+    overflow: hidden;
+    background: #f5f5f5;
+    position: relative;
+  }
+  .card-image-wrap img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    transition: transform 0.35s ease;
+    padding: 10px;
+  }
+  .product-card:hover .card-image-wrap img { transform: scale(1.08); }
+
+  .grade-badge {
+    position: absolute; top: 10px; left: 10px;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 9px; border-radius: 50px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .grade-New    { background: #e3f2fd; color: #1565c0; }
+  .grade-A      { background: #e8f5e9; color: #2e7d32; }
+  .grade-B      { background: #fff3e0; color: #e65100; }
+  .grade-C      { background: #f3e5f5; color: #6a1b9a; }
+  .grade-       { background: #f5f5f5; color: #888; }
+
+  .stock-badge {
+    position: absolute; top: 10px; right: 10px;
+    font-size: 10px; font-weight: 600;
+    padding: 3px 8px; border-radius: 50px;
+    background: rgba(0,0,0,0.6); color: white;
+  }
+
+  .card-body { padding: 14px 16px; flex: 1; display: flex; flex-direction: column; }
+  .card-brand { font-size: 11px; font-weight: 600; color: var(--light); text-transform: uppercase; letter-spacing: 0.8px; }
+  .card-model { font-size: 15px; font-weight: 600; color: var(--dark); margin: 3px 0 4px; line-height: 1.3; }
+  .card-desc   { font-size: 12px; color: var(--mid); line-height: 1.5; flex: 1; margin-bottom: 10px; }
+  .card-warranty { font-size: 11px; color: var(--green); font-weight: 500; margin-bottom: 10px; }
+
+  .card-price {
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .best-price-label { font-size: 10px; font-weight: 600; color: var(--terra); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; }
+  .spl-price { font-size: 20px; font-weight: 700; color: var(--terra); }
+  .mrp-price  { font-size: 13px; color: var(--light); text-decoration: line-through; }
+  .discount-pct { font-size: 12px; font-weight: 600; color: var(--green); background: var(--green-pale); padding: 2px 7px; border-radius: 50px; }
+
+  .card-actions { display: flex; gap: 8px; }
+  .btn-wa {
+    flex: 1;
+    background: var(--wa);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: background 0.2s;
+  }
+  .btn-wa:hover { background: #1ebe5d; }
+  .btn-cart {
+    background: var(--green-pale);
+    color: var(--green);
+    border: 1.5px solid var(--green);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-cart:hover { background: var(--green); color: white; }
+
+  /* ── PRODUCT MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 500;
+    align-items: center; justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: white;
+    border-radius: 16px;
+    max-width: 780px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: popIn 0.25s ease;
+    position: relative;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.92); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 16px;
+    background: rgba(0,0,0,0.08);
+    border: none; border-radius: 50%;
+    width: 34px; height: 34px;
+    font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s; z-index: 10;
+  }
+  .modal-close:hover { background: rgba(0,0,0,0.15); }
+
+  .modal-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  @media (max-width: 580px) { .modal-inner { grid-template-columns: 1fr; } }
+
+  .modal-images {
+    background: #f8f8f8;
+    border-radius: 16px 0 0 16px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  @media (max-width: 580px) { .modal-images { border-radius: 16px 16px 0 0; min-height: 220px; } }
+
+  .modal-img-main {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    min-height: 250px;
+  }
+  .modal-img-main img { max-width: 100%; max-height: 240px; object-fit: contain; }
+  .modal-img-thumbs {
+    display: flex; gap: 8px; padding: 12px;
+    border-top: 1px solid var(--border);
+    background: white;
+  }
+  .modal-thumb {
+    width: 52px; height: 52px;
+    border-radius: 8px; overflow: hidden;
+    border: 2px solid transparent; cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .modal-thumb.active { border-color: var(--green); }
+  .modal-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+
+  .modal-details { padding: 28px 24px; display: flex; flex-direction: column; gap: 12px; }
+  .modal-grade-row { display: flex; gap: 8px; align-items: center; }
+  .modal-brand-cat { font-size: 12px; color: var(--light); text-transform: uppercase; letter-spacing: 0.8px; }
+  .modal-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--dark); line-height: 1.25; }
+  .modal-desc { font-size: 13px; color: var(--mid); line-height: 1.7; }
+  .modal-warranty { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--green); font-weight: 500; }
+  .modal-price-block { border-top: 1px solid var(--border); padding-top: 12px; }
+  .modal-best-label { font-size: 10px; font-weight: 700; color: var(--terra); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .modal-spl { font-size: 28px; font-weight: 700; color: var(--terra); }
+  .modal-mrp-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  .modal-mrp { font-size: 14px; color: var(--light); text-decoration: line-through; }
+  .modal-save { font-size: 13px; color: var(--green); font-weight: 600; }
+  .modal-stock { font-size: 13px; color: var(--mid); }
+  .modal-stock strong { color: var(--dark); }
+
+  .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .btn-wa-full, .btn-cart-full {
+    width: 100%; padding: 13px;
+    border-radius: 10px; border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s;
+  }
+  .btn-wa-full { background: var(--wa); color: white; }
+  .btn-wa-full:hover { background: #1ebe5d; }
+  .btn-cart-full { background: var(--green-pale); color: var(--green); border: 1.5px solid var(--green); }
+  .btn-cart-full:hover { background: var(--green); color: white; }
+
+  /* ── CART DRAWER ── */
+  .cart-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 400;
+  }
+  .cart-overlay.open { display: block; }
+
+  .cart-drawer {
+    position: fixed; top: 0; right: -420px;
+    width: min(420px, 100vw);
+    height: 100vh;
+    background: white;
+    z-index: 401;
+    display: flex; flex-direction: column;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+    transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .cart-drawer.open { right: 0; }
+
+  .cart-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .cart-header h2 { font-family: 'DM Serif Display', serif; font-size: 20px; }
+  .cart-close {
+    background: none; border: none; font-size: 22px; cursor: pointer;
+    color: var(--mid); padding: 4px;
+    transition: color 0.2s;
+  }
+  .cart-close:hover { color: var(--dark); }
+
+  .cart-items { flex: 1; overflow-y: auto; padding: 16px 20px; }
+  .cart-empty { text-align: center; padding: 60px 20px; color: var(--light); }
+  .cart-empty .icon { font-size: 40px; margin-bottom: 12px; }
+  .cart-empty p { font-size: 14px; }
+
+  .cart-item {
+    display: flex; gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .cart-item-img {
+    width: 60px; height: 60px;
+    border-radius: 8px; overflow: hidden;
+    background: #f5f5f5; flex-shrink: 0;
+  }
+  .cart-item-img img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+  .cart-item-info { flex: 1; min-width: 0; }
+  .cart-item-brand { font-size: 10px; color: var(--light); text-transform: uppercase; }
+  .cart-item-name { font-size: 13px; font-weight: 600; color: var(--dark); margin: 2px 0; }
+  .cart-item-price { font-size: 14px; font-weight: 700; color: var(--terra); }
+  .cart-item-remove {
+    background: none; border: none; color: var(--light); cursor: pointer;
+    font-size: 18px; padding: 2px; transition: color 0.2s;
+    flex-shrink: 0;
+  }
+  .cart-item-remove:hover { color: #e53935; }
+
+  .cart-footer {
+    border-top: 1px solid var(--border);
+    padding: 20px;
+  }
+  .cart-total {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+  }
+  .cart-total span { font-size: 14px; color: var(--mid); font-weight: 500; }
+  .cart-total strong { font-size: 20px; color: var(--dark); }
+  .btn-wa-cart {
+    width: 100%; padding: 14px;
+    background: var(--wa); color: white;
+    border: none; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.2s;
+  }
+  .btn-wa-cart:hover { background: #1ebe5d; }
+
+  /* ── ADMIN PANEL ── */
+  #admin-panel {
+    display: none;
+    background: #e0f2f1;
+    border-bottom: 2px solid #26a69a;
+    padding: 20px 24px;
+    text-align: center;
+  }
+  #admin-panel h3 { font-size: 15px; color: #00695c; margin-bottom: 8px; }
+  #admin-panel p  { font-size: 13px; color: var(--mid); margin-bottom: 12px; }
+  #csv-file {
+    padding: 8px 12px;
+    border: 1.5px solid #80cbc4;
+    border-radius: 8px;
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 32px 24px;
+    color: var(--light); border-top: 1px solid var(--border);
+    margin-top: 20px; font-size: 13px;
+    line-height: 1.8;
+  }
+  .admin-trigger { color: #e8e4dd; cursor: pointer; font-size: 11px; }
+  .admin-trigger:hover { color: var(--light); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--dark); color: white;
+    padding: 12px 22px; border-radius: 50px;
+    font-size: 14px; font-weight: 500;
+    z-index: 600;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span class="logo-leaf">🌿</span>
+    GreenNest<span>Buy</span>
+  </div>
+  <div class="header-right">
+    <button class="cart-btn" onclick="openCart()">
+      🛒 Cart <span class="cart-count" id="cart-count">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel">
+  <h3>📦 Inventory Update — Admin Only</h3>
+  <p>ನಿಮ್ಮ Google Sheets ರಿಂದ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿದ CSV ಫೈಲ್ ಅನ್ನು ಇಲ್ಲಿ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.</p>
+  <input type="file" id="csv-file" accept=".csv">
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Smart Appliances,<br><em>Smart Savings.</em></h1>
+  <p>Quality-certified refurbished & OEM surplus home appliances. Graded, warranted, delivered.</p>
+  <div class="hero-badges">
+    <span class="badge">✅ Quality Graded</span>
+    <span class="badge">🔧 Warranty Covered</span>
+    <span class="badge">💬 WhatsApp Orders</span>
+    <span class="badge">🌿 Eco-Friendly Choice</span>
+  </div>
+</div>
+
+<!-- WHAT IS REFURBISHED? -->
+<div class="refurb-section">
+  <button class="refurb-toggle" id="refurb-toggle" onclick="toggleRefurb()">
+    <span>🔍 What is Refurbished? — Our Quality Grading Explained</span>
+    <span class="arrow">▼</span>
+  </button>
+  <div class="refurb-body" id="refurb-body">
+    <p class="refurb-intro">
+      All our products are <strong>OEM / SCM surplus appliances</strong> — sourced directly from manufacturers and supply chains. Each unit is inspected and graded before sale. You get genuine quality at a fraction of the price.
+    </p>
+    <div class="refurb-cards">
+      <div class="refurb-card">
+        <h4>🔵 New</h4>
+        <p>Brand new, sealed or unboxed. Never used. Full manufacturer quality.</p>
+      </div>
+      <div class="refurb-card">
+        <h4>🟢 Grade A</h4>
+        <p>Like new condition. Fully functional. Minor or no cosmetic marks. Best value.</p>
+      </div>
+      <div class="refurb-card">
+        <h4>🟠 Grade B</h4>
+        <p>Good working condition. Light cosmetic wear. Tested and cleaned. Great savings.</p>
+      </div>
+      <div class="refurb-card">
+        <h4>🟣 Grade C</h4>
+        <p>Fully functional with visible wear. Budget-friendly. Ideal for utility use.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-bar" id="filters-bar" style="display:none;">
+  <span class="filter-label">Category</span>
+  <div class="filter-group" id="category-filters"></div>
+  <div class="filter-divider"></div>
+  <span class="filter-label">Grade</span>
+  <div class="filter-group" id="grade-filters">
+    <button class="filter-chip grade-new" data-grade="New" onclick="toggleGrade(this)">🔵 New</button>
+    <button class="filter-chip grade-a"   data-grade="A"   onclick="toggleGrade(this)">🟢 A</button>
+    <button class="filter-chip grade-b"   data-grade="B"   onclick="toggleGrade(this)">🟠 B</button>
+    <button class="filter-chip grade-c"   data-grade="C"   onclick="toggleGrade(this)">🟣 C</button>
+  </div>
+  <span class="results-count" id="results-count"></span>
+</div>
+
+<!-- PRODUCT GRID -->
+<div id="product-container">
+  <div class="empty-state">
+    <div class="icon">📂</div>
+    <h3>No products loaded yet</h3>
+    <p>Click <strong>Admin</strong> in the footer to upload your CSV inventory.</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  © 2026 GreenNestBuy.in | Bengaluru, Karnataka<br>
+  Quality Refurbished &amp; OEM Surplus Appliances<br><br>
+  📞 <a href="tel:+919880051344" style="color:var(--mid);text-decoration:none;">98800 51344</a> &nbsp;·&nbsp;
+  <a href="tel:+919986506123" style="color:var(--mid);text-decoration:none;">99865 06123</a> &nbsp;·&nbsp;
+  <a href="tel:+918088210321" style="color:var(--mid);text-decoration:none;">80882 10321</a><br>
+  ✉️ <a href="mailto:greennestbuy@gmail.com" style="color:var(--mid);text-decoration:none;">greennestbuy@gmail.com</a><br><br>
+  <span class="admin-trigger" onclick="checkAdmin()">Admin</span>
+</footer>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnBg(event)">
+  <div class="modal-box" id="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-inner">
+      <div class="modal-images">
+        <div class="modal-img-main" id="modal-img-main">
+          <img id="modal-main-img" src="" alt="">
+        </div>
+        <div class="modal-img-thumbs" id="modal-thumbs"></div>
+      </div>
+      <div class="modal-details" id="modal-details"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CART DRAWER -->
+<div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cart-drawer">
+  <div class="cart-header">
+    <h2>🛒 Your Cart</h2>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items">
+    <div class="cart-empty">
+      <div class="icon">🛒</div>
+      <p>Your cart is empty.<br>Add products to enquire via WhatsApp!</p>
+    </div>
+  </div>
+  <div class="cart-footer" id="cart-footer" style="display:none;">
+    <div class="cart-total">
+      <span>Total Estimate</span>
+      <strong id="cart-total-price">₹0</strong>
+    </div>
+    <button class="btn-wa-cart" onclick="orderCartViaWA()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Enquire All via WhatsApp
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let allProducts = [];
+let cart = [];
+let activeCategory = 'All';
+let activeGrades = [];
+const WA_NUMBER = '919880051344'; // Primary WhatsApp number
+
+// ── COLUMN MAP (matches Google Sheets headers exactly) ──
+const COL = {
+  code:     'ITEM CODE',
+  category: 'category',
+  make:     'MAKE',
+  desc:     'Description',
+  model:    'MODEL',
+  mrp:      'MRP',
+  splPrice: 'SPL PRICE',
+  grading:  'GRADING',
+  warranty: 'WARRANTY',
+  stock:    'STOCK IN HAND',
+  image1:   'IMAGE 1',
+  image2:   'IMAGE 2',
+};
+
+// ── ADMIN ──
+function checkAdmin() {
+  const pw = prompt('ಅಡ್ಮಿನ್ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ:');
+  if (pw === '1234') {
+    document.getElementById('admin-panel').style.display = 'block';
+    showToast('✅ Admin panel activated');
+  } else if (pw !== null) {
+    alert('ತಪ್ಪು ಪಾಸ್‌ವರ್ಡ್!');
+  }
+}
+
+document.getElementById('csv-file').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+      allProducts = results.data.filter(p => {
+        const stock = parseInt(p[COL.stock]) || 0;
+        return stock > 0;
+      });
+      buildCategoryFilters();
+      activeCategory = 'All';
+      activeGrades = [];
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      renderProducts();
+      document.getElementById('filters-bar').style.display = 'flex';
+      showToast(`✅ ${allProducts.length} products loaded`);
+    }
+  });
+});
+
+// ── FILTERS ──
+function buildCategoryFilters() {
+  const cats = ['All', ...new Set(allProducts.map(p => p[COL.category]).filter(Boolean))];
+  const container = document.getElementById('category-filters');
+  container.innerHTML = '';
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-chip' + (cat === 'All' ? ' active' : '');
+    btn.textContent = cat;
+    btn.dataset.cat = cat;
+    btn.onclick = () => toggleCategory(btn);
+    container.appendChild(btn);
+  });
+}
+
+function toggleCategory(btn) {
+  document.querySelectorAll('#category-filters .filter-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  activeCategory = btn.dataset.cat;
+  renderProducts();
+}
+
+function toggleGrade(btn) {
+  const grade = btn.dataset.grade;
+  if (activeGrades.includes(grade)) {
+    activeGrades = activeGrades.filter(g => g !== grade);
+    btn.classList.remove('active');
+  } else {
+    activeGrades.push(grade);
+    btn.classList.add('active');
+  }
+  renderProducts();
+}
+
+function getFiltered() {
+  return allProducts.filter(p => {
+    const catOk = activeCategory === 'All' || p[COL.category] === activeCategory;
+    const gradeOk = activeGrades.length === 0 || activeGrades.includes((p[COL.grading] || '').trim());
+    return catOk && gradeOk;
+  });
+}
+
+// ── RENDER ──
+function renderProducts() {
+  const filtered = getFiltered();
+  document.getElementById('results-count').textContent = `${filtered.length} product${filtered.length !== 1 ? 's' : ''}`;
+  const container = document.getElementById('product-container');
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><h3>No products found</h3><p>Try adjusting your filters.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'product-grid';
+
+  filtered.forEach((p, i) => {
+    const mrp     = parseFloat(p[COL.mrp]) || 0;
+    const spl     = parseFloat(p[COL.splPrice]) || 0;
+    const discount = mrp > spl && mrp > 0 ? Math.round((mrp - spl) / mrp * 100) : 0;
+    const grade   = (p[COL.grading] || '').trim();
+    const img1    = p[COL.image1] || '';
+    const stock   = parseInt(p[COL.stock]) || 0;
+
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.style.animationDelay = `${Math.min(i, 12) * 0.04}s`;
+    card.onclick = () => openModal(p);
+
+    card.innerHTML = `
+      <div class="card-image-wrap">
+        <img src="${img1}" alt="${p[COL.model] || ''}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%2250%25%22 font-size=%2240%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>📦</text></svg>'">
+        <span class="grade-badge grade-${grade || ''}">${gradeLabel(grade)}</span>
+        ${stock <= 3 ? `<span class="stock-badge">Only ${stock} left</span>` : ''}
+      </div>
+      <div class="card-body">
+        <div class="card-brand">${p[COL.make] || ''}</div>
+        <div class="card-model">${p[COL.model] || ''}</div>
+        <div class="card-desc">${p[COL.desc] || ''}</div>
+        ${p[COL.warranty] ? `<div class="card-warranty">🔧 ${p[COL.warranty]}</div>` : ''}
+        <div class="card-price">
+          <div>
+            <span class="best-price-label">Best Price</span>
+            <span class="spl-price">₹${formatPrice(spl)}</span>
+          </div>
+          ${mrp > spl ? `<span class="mrp-price">₹${formatPrice(mrp)}</span>` : ''}
+          ${discount > 0 ? `<span class="discount-pct">${discount}% off</span>` : ''}
+        </div>
+        <div class="card-actions" onclick="event.stopPropagation()">
+          <button class="btn-wa" onclick="orderViaWA(event, ${allProducts.indexOf(p)})">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Order
+          </button>
+          <button class="btn-cart" onclick="addToCart(event, ${allProducts.indexOf(p)})">+ Cart</button>
+        </div>
+      </div>`;
+
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+}
+
+// ── MODAL ──
+function openModal(p) {
+  const mrp = parseFloat(p[COL.mrp]) || 0;
+  const spl = parseFloat(p[COL.splPrice]) || 0;
+  const discount = mrp > spl && mrp > 0 ? Math.round((mrp - spl) / mrp * 100) : 0;
+  const grade = (p[COL.grading] || '').trim();
+  const img1 = p[COL.image1] || '';
+  const img2 = p[COL.image2] || '';
+  const imgs = [img1, img2].filter(Boolean);
+  const idx = allProducts.indexOf(p);
+
+  // Main image
+  document.getElementById('modal-main-img').src = img1;
+  document.getElementById('modal-main-img').alt = p[COL.model] || '';
+
+  // Thumbs
+  const thumbsEl = document.getElementById('modal-thumbs');
+  thumbsEl.innerHTML = '';
+  imgs.forEach((src, i) => {
+    const t = document.createElement('div');
+    t.className = 'modal-thumb' + (i === 0 ? ' active' : '');
+    t.innerHTML = `<img src="${src}" alt="">`;
+    t.onclick = () => {
+      document.getElementById('modal-main-img').src = src;
+      thumbsEl.querySelectorAll('.modal-thumb').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+    };
+    thumbsEl.appendChild(t);
+  });
+  if (imgs.length <= 1) thumbsEl.style.display = 'none';
+  else thumbsEl.style.display = 'flex';
+
+  // Details
+  document.getElementById('modal-details').innerHTML = `
+    <div class="modal-grade-row">
+      <span class="grade-badge grade-${grade}" style="position:static;">${gradeLabel(grade)}</span>
+      <span class="modal-brand-cat">${p[COL.category] || ''}</span>
+    </div>
+    <div class="modal-brand-cat">${p[COL.make] || ''} &nbsp;·&nbsp; ${p[COL.code] || ''}</div>
+    <div class="modal-title">${p[COL.model] || ''}</div>
+    <div class="modal-desc">${p[COL.desc] || ''}</div>
+    ${p[COL.warranty] ? `<div class="modal-warranty">🔧 Warranty: ${p[COL.warranty]}</div>` : ''}
+    <div class="modal-price-block">
+      <div class="modal-best-label">Best Price</div>
+      <div class="modal-spl">₹${formatPrice(spl)}</div>
+      ${mrp > spl ? `
+      <div class="modal-mrp-row">
+        <span class="modal-mrp">MRP ₹${formatPrice(mrp)}</span>
+        ${discount > 0 ? `<span class="modal-save">You save ${discount}%</span>` : ''}
+      </div>` : ''}
+    </div>
+    <div class="modal-stock">Stock available: <strong>${p[COL.stock] || '—'} units</strong></div>
+    <div class="modal-actions">
+      <button class="btn-wa-full" onclick="orderViaWA(event, ${idx})">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Order via WhatsApp
+      </button>
+      <button class="btn-cart-full" onclick="addToCart(event, ${idx})">🛒 Add to Cart</button>
+    </div>
+  `;
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOnBg(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+// ── CART ──
+function addToCart(e, idx) {
+  e.stopPropagation();
+  const p = allProducts[idx];
+  const existing = cart.find(c => c[COL.code] === p[COL.code]);
+  if (existing) { showToast('Already in cart!'); return; }
+  cart.push(p);
+  updateCartUI();
+  showToast(`✅ Added: ${p[COL.model]}`);
+}
+
+function removeFromCart(idx) {
+  cart.splice(idx, 1);
+  updateCartUI();
+}
+
+function updateCartUI() {
+  document.getElementById('cart-count').textContent = cart.length;
+  const container = document.getElementById('cart-items');
+  const footer = document.getElementById('cart-footer');
+
+  if (cart.length === 0) {
+    container.innerHTML = `<div class="cart-empty"><div class="icon">🛒</div><p>Your cart is empty.<br>Add products to enquire via WhatsApp!</p></div>`;
+    footer.style.display = 'none';
+    return;
+  }
+
+  footer.style.display = 'block';
+  container.innerHTML = '';
+  let total = 0;
+
+  cart.forEach((p, i) => {
+    const spl = parseFloat(p[COL.splPrice]) || 0;
+    total += spl;
+    const item = document.createElement('div');
+    item.className = 'cart-item';
+    item.innerHTML = `
+      <div class="cart-item-img">
+        <img src="${p[COL.image1] || ''}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%2250%25%22 font-size=%2240%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>📦</text></svg>'">
+      </div>
+      <div class="cart-item-info">
+        <div class="cart-item-brand">${p[COL.make] || ''}</div>
+        <div class="cart-item-name">${p[COL.model] || ''}</div>
+        <div class="cart-item-price">₹${formatPrice(spl)}</div>
+      </div>
+      <button class="cart-item-remove" onclick="removeFromCart(${i})">✕</button>`;
+    container.appendChild(item);
+  });
+
+  document.getElementById('cart-total-price').textContent = '₹' + formatPrice(total);
+}
+
+function openCart() {
+  document.getElementById('cart-drawer').classList.add('open');
+  document.getElementById('cart-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCart() {
+  document.getElementById('cart-drawer').classList.remove('open');
+  document.getElementById('cart-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── WHATSAPP ──
+function orderViaWA(e, idx) {
+  e.stopPropagation();
+  const p = allProducts[idx];
+  const spl = parseFloat(p[COL.splPrice]) || 0;
+  const msg = `Hello GreenNestBuy! 👋\n\nI'm interested in:\n\n` +
+    `*${p[COL.make]} ${p[COL.model]}*\n` +
+    `Code: ${p[COL.code] || '—'}\n` +
+    `Grade: ${p[COL.grading] || '—'}\n` +
+    `Price: ₹${formatPrice(spl)}\n` +
+    `Warranty: ${p[COL.warranty] || '—'}\n\n` +
+    `Please share availability and delivery details. Thank you!`;
+  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function orderCartViaWA() {
+  if (cart.length === 0) return;
+  let msg = `Hello GreenNestBuy! 👋\n\nI'd like to enquire about the following products:\n\n`;
+  let total = 0;
+  cart.forEach((p, i) => {
+    const spl = parseFloat(p[COL.splPrice]) || 0;
+    total += spl;
+    msg += `${i+1}. *${p[COL.make]} ${p[COL.model]}* (${p[COL.grading] || '—'}) — ₹${formatPrice(spl)}\n`;
+  });
+  msg += `\n*Total Estimate: ₹${formatPrice(total)}*\n\nPlease share availability and delivery details. Thank you!`;
+  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// ── REFURBISHED TOGGLE ──
+function toggleRefurb() {
+  const body = document.getElementById('refurb-body');
+  const btn = document.getElementById('refurb-toggle');
+  body.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+
+// ── HELPERS ──
+function formatPrice(n) {
+  return Number(n).toLocaleString('en-IN');
+}
+
+function gradeLabel(g) {
+  if (!g) return 'Stock';
+  if (g === 'New') return '🔵 New';
+  if (g === 'A')   return '🟢 Grade A';
+  if (g === 'B')   return '🟠 Grade B';
+  if (g === 'C')   return '🟣 Grade C';
+  return g;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// Keyboard close
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeCart(); }
+});
+</script>
+</body>
+</html>
